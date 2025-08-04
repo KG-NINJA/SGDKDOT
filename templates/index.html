@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SGDK Character Creator</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background-color: #000000;
+            color: #00AEEF;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 20px;
+        }
+        
+        .panel {
+            background-color: #111111;
+            border: 2px solid #00AEEF;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        
+        .panel h2 {
+            color: #E60012;
+            margin-top: 0;
+            border-bottom: 1px solid #00AEEF;
+            padding-bottom: 10px;
+        }
+        
+        .section {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #0A0A0A;
+            border-radius: 5px;
+        }
+        
+        .section h3 {
+            color: #00AEEF;
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+        
+        .radio-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .radio-group label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            padding: 5px 10px;
+            background-color: #222222;
+            border-radius: 3px;
+            transition: background-color 0.2s;
+        }
+        
+        .radio-group label:hover {
+            background-color: #333333;
+        }
+        
+        .radio-group input[type="radio"] {
+            margin-right: 5px;
+        }
+        
+        .color-control {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        
+        .color-picker {
+            width: 40px;
+            height: 30px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        
+        .slider-control {
+            margin-bottom: 15px;
+        }
+        
+        .slider-control label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        
+        .slider-control input[type="range"] {
+            width: 100%;
+            margin-bottom: 5px;
+        }
+        
+        .slider-value {
+            color: #FFFF66;
+            font-weight: bold;
+        }
+        
+        .button {
+            background-color: #E60012;
+            color: #00AEEF;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            width: 100%;
+            margin-bottom: 10px;
+            transition: background-color 0.2s;
+        }
+        
+        .button:hover {
+            background-color: #FF1122;
+        }
+        
+        .preview-panel {
+            text-align: center;
+        }
+        
+        .preview-canvas {
+            background-color: #222222;
+            border: 2px solid #00AEEF;
+            border-radius: 8px;
+            margin: 20px 0;
+            padding: 20px;
+            min-height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .character-sprite {
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+            max-width: 300px;
+            max-height: 300px;
+        }
+        
+        .animation-controls {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .frame-info {
+            color: #FFFF66;
+        }
+        
+        .export-section {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #0A0A0A;
+            border-radius: 5px;
+        }
+        
+        .file-output {
+            background-color: #000000;
+            border: 1px solid #00AEEF;
+            color: #00AEEF;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .character-name {
+            width: 100%;
+            padding: 8px;
+            background-color: #222222;
+            border: 1px solid #00AEEF;
+            color: #00AEEF;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            margin-bottom: 10px;
+        }
+        
+        .loading {
+            color: #FFFF66;
+            text-align: center;
+        }
+        
+        .error {
+            color: #FF6666;
+            background-color: #330000;
+            padding: 10px;
+            border-radius: 3px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Control Panel -->
+        <div class="panel">
+            <h2>Character Editor</h2>
+            
+            <!-- Body Parts -->
+            <div class="section">
+                <h3>Body Parts</h3>
+                
+                <div>
+                    <label>Head Type:</label>
+                    <div class="radio-group">
+                        <label><input type="radio" name="head_type" value="round" checked> Round</label>
+                        <label><input type="radio" name="head_type" value="square"> Square</label>
+                        <label><input type="radio" name="head_type" value="oval"> Oval</label>
+                        <label><input type="radio" name="head_type" value="triangle"> Triangle</label>
+                    </div>
+                </div>
+                
+                <div>
+                    <label>Body Type:</label>
+                    <div class="radio-group">
+                        <label><input type="radio" name="body_type" value="normal" checked> Normal</label>
+                        <label><input type="radio" name="body_type" value="muscular"> Muscular</label>
+                        <label><input type="radio" name="body_type" value="slim"> Slim</label>
+                        <label><input type="radio" name="body_type" value="round"> Round</label>
+                    </div>
+                </div>
+                
+                <div>
+                    <label>Arm Type:</label>
+                    <div class="radio-group">
+                        <label><input type="radio" name="arm_type" value="normal" checked> Normal</label>
+                        <label><input type="radio" name="arm_type" value="muscular"> Muscular</label>
+                        <label><input type="radio" name="arm_type" value="thin"> Thin</label>
+                        <label><input type="radio" name="arm_type" value="long"> Long</label>
+                    </div>
+                </div>
+                
+                <div>
+                    <label>Leg Type:</label>
+                    <div class="radio-group">
+                        <label><input type="radio" name="leg_type" value="normal" checked> Normal</label>
+                        <label><input type="radio" name="leg_type" value="muscular"> Muscular</label>
+                        <label><input type="radio" name="leg_type" value="thin"> Thin</label>
+                        <label><input type="radio" name="leg_type" value="long"> Long</label>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Colors -->
+            <div class="section">
+                <h3>Colors</h3>
+                
+                <div class="color-control">
+                    <label>Head Color:</label>
+                    <input type="color" class="color-picker" id="head_color" value="#FFDDAA">
+                </div>
+                
+                <div class="color-control">
+                    <label>Body Color:</label>
+                    <input type="color" class="color-picker" id="body_color" value="#0066CC">
+                </div>
+                
+                <div class="color-control">
+                    <label>Arm Color:</label>
+                    <input type="color" class="color-picker" id="arm_color" value="#FFDDAA">
+                </div>
+                
+                <div class="color-control">
+                    <label>Leg Color:</label>
+                    <input type="color" class="color-picker" id="leg_color" value="#0066CC">
+                </div>
+            </div>
+            
+            <!-- Size & Animation -->
+            <div class="section">
+                <h3>Size & Animation</h3>
+                
+                <div class="slider-control">
+                    <label>Sprite Size: <span class="slider-value" id="size_value">32px</span></label>
+                    <input type="range" id="size" min="16" max="64" value="32">
+                </div>
+                
+                <div class="slider-control">
+                    <label>Animation Frames: <span class="slider-value" id="frames_value">4</span></label>
+                    <input type="range" id="animation_frames" min="1" max="8" value="4">
+                </div>
+            </div>
+            
+            <!-- Action Buttons -->
+            <div class="section">
+                <button class="button" onclick="generateRandom()">Random Character</button>
+                <button class="button" onclick="saveCharacter()">Save Character</button>
+                <button class="button" onclick="loadCharacter()">Load Character</button>
+            </div>
+        </div>
+        
+        <!-- Preview Panel -->
+        <div class="panel preview-panel">
+            <h2>Preview</h2>
+            
+            <div class="preview-canvas">
+                <img id="character_preview" class="character-sprite" src="" alt="Character Preview" style="display: none;">
+                <div id="loading" class="loading">Loading...</div>
+            </div>
+            
+            <div class="animation-controls">
+                <label>
+                    <input type="checkbox" id="play_animation"> Play Animation
+                </label>
+                <span class="frame-info" id="frame_info">Frame: 1/4</span>
+            </div>
+            
+            <!-- Export Section -->
+            <div class="export-section">
+                <h3>Export to SGDK</h3>
+                <input type="text" class="character-name" id="character_name" placeholder="Character name" value="my_character">
+                <button class="button" onclick="exportCharacter()">Export to SGDK</button>
+                
+                <div id="export_output" style="display: none;">
+                    <h4>Generated Files:</h4>
+                    <div id="c_file_output"></div>
+                    <div id="h_file_output"></div>
+                    <div id="png_output"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let currentFrame = 0;
+        let animationInterval = null;
+        let characterData = {
+            head_type: 'round',
+            body_type: 'normal',
+            arm_type: 'normal',
+            leg_type: 'normal',
+            head_color: '#FFDDAA',
+            body_color: '#0066CC',
+            arm_color: '#FFDDAA',
+            leg_color: '#0066CC',
+            size: 32,
+            animation_frames: 4
+        };
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            setupEventListeners();
+            updatePreview();
+        });
+        
+        function setupEventListeners() {
+            // Radio buttons
+            document.querySelectorAll('input[type="radio"]').forEach(radio => {
+                radio.addEventListener('change', updateCharacterData);
+            });
+            
+            // Color pickers
+            document.querySelectorAll('.color-picker').forEach(picker => {
+                picker.addEventListener('change', updateCharacterData);
+            });
+            
+            // Sliders
+            document.getElementById('size').addEventListener('input', function() {
+                document.getElementById('size_value').textContent = this.value + 'px';
+                updateCharacterData();
+            });
+            
+            document.getElementById('animation_frames').addEventListener('input', function() {
+                document.getElementById('frames_value').textContent = this.value;
+                updateCharacterData();
+            });
+            
+            // Animation checkbox
+            document.getElementById('play_animation').addEventListener('change', toggleAnimation);
+        }
+        
+        function updateCharacterData() {
+            // Get radio button values
+            characterData.head_type = document.querySelector('input[name="head_type"]:checked').value;
+            characterData.body_type = document.querySelector('input[name="body_type"]:checked').value;
+            characterData.arm_type = document.querySelector('input[name="arm_type"]:checked').value;
+            characterData.leg_type = document.querySelector('input[name="leg_type"]:checked').value;
+            
+            // Get color values
+            characterData.head_color = document.getElementById('head_color').value;
+            characterData.body_color = document.getElementById('body_color').value;
+            characterData.arm_color = document.getElementById('arm_color').value;
+            characterData.leg_color = document.getElementById('leg_color').value;
+            
+            // Get slider values
+            characterData.size = parseInt(document.getElementById('size').value);
+            characterData.animation_frames = parseInt(document.getElementById('animation_frames').value);
+            
+            updatePreview();
+        }
+        
+        function updatePreview() {
+            const data = {...characterData, frame: currentFrame};
+            
+            fetch('/api/generate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    const preview = document.getElementById('character_preview');
+                    const loading = document.getElementById('loading');
+                    
+                    preview.src = result.image;
+                    preview.style.display = 'block';
+                    loading.style.display = 'none';
+                    
+                    updateFrameInfo();
+                } else {
+                    console.error('Error generating character:', result.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+        
+        function updateFrameInfo() {
+            document.getElementById('frame_info').textContent = 
+                `Frame: ${currentFrame + 1}/${characterData.animation_frames}`;
+        }
+        
+        function toggleAnimation() {
+            const isPlaying = document.getElementById('play_animation').checked;
+            
+            if (isPlaying) {
+                animationInterval = setInterval(() => {
+                    currentFrame = (currentFrame + 1) % characterData.animation_frames;
+                    updatePreview();
+                }, 200);
+            } else {
+                if (animationInterval) {
+                    clearInterval(animationInterval);
+                    animationInterval = null;
+                }
+            }
+        }
+        
+        function generateRandom() {
+            fetch('/api/random')
+            .then(response => response.json())
+            .then(data => {
+                characterData = data;
+                
+                // Update UI controls
+                document.querySelector(`input[name="head_type"][value="${data.head_type}"]`).checked = true;
+                document.querySelector(`input[name="body_type"][value="${data.body_type}"]`).checked = true;
+                document.querySelector(`input[name="arm_type"][value="${data.arm_type}"]`).checked = true;
+                document.querySelector(`input[name="leg_type"][value="${data.leg_type}"]`).checked = true;
+                
+                document.getElementById('head_color').value = data.head_color;
+                document.getElementById('body_color').value = data.body_color;
+                document.getElementById('arm_color').value = data.arm_color;
+                document.getElementById('leg_color').value = data.leg_color;
+                
+                document.getElementById('size').value = data.size;
+                document.getElementById('animation_frames').value = data.animation_frames;
+                
+                document.getElementById('size_value').textContent = data.size + 'px';
+                document.getElementById('frames_value').textContent = data.animation_frames;
+                
+                updatePreview();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+        
+        function saveCharacter() {
+            const dataStr = JSON.stringify(characterData, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(dataBlob);
+            
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'character.json';
+            link.click();
+            
+            URL.revokeObjectURL(url);
+        }
+        
+        function loadCharacter() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            
+            input.onchange = function(event) {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        try {
+                            const data = JSON.parse(e.target.result);
+                            characterData = data;
+                            
+                            // Update UI controls
+                            document.querySelector(`input[name="head_type"][value="${data.head_type}"]`).checked = true;
+                            document.querySelector(`input[name="body_type"][value="${data.body_type}"]`).checked = true;
+                            document.querySelector(`input[name="arm_type"][value="${data.arm_type}"]`).checked = true;
+                            document.querySelector(`input[name="leg_type"][value="${data.leg_type}"]`).checked = true;
+                            
+                            document.getElementById('head_color').value = data.head_color;
+                            document.getElementById('body_color').value = data.body_color;
+                            document.getElementById('arm_color').value = data.arm_color;
+                            document.getElementById('leg_color').value = data.leg_color;
+                            
+                            document.getElementById('size').value = data.size;
+                            document.getElementById('animation_frames').value = data.animation_frames;
+                            
+                            document.getElementById('size_value').textContent = data.size + 'px';
+                            document.getElementById('frames_value').textContent = data.animation_frames;
+                            
+                            updatePreview();
+                        } catch (error) {
+                            alert('Error loading character file: ' + error.message);
+                        }
+                    };
+                    reader.readAsText(file);
+                }
+            };
+            
+            input.click();
+        }
+        
+        function exportCharacter() {
+            const characterName = document.getElementById('character_name').value || 'my_character';
+            const data = {...characterData, name: characterName};
+            
+            fetch('/api/export', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    const output = document.getElementById('export_output');
+                    output.style.display = 'block';
+                    
+                    if (result.files.c_file) {
+                        document.getElementById('c_file_output').innerHTML = 
+                            `<h5>${characterName}.c</h5><div class="file-output">${result.files.c_file}</div>`;
+                    }
+                    
+                    if (result.files.h_file) {
+                        document.getElementById('h_file_output').innerHTML = 
+                            `<h5>${characterName}.h</h5><div class="file-output">${result.files.h_file}</div>`;
+                    }
+                    
+                    if (result.files.png_file) {
+                        document.getElementById('png_output').innerHTML = 
+                            `<h5>${characterName}.png (Sprite Sheet)</h5><img src="${result.files.png_file}" style="max-width: 100%; image-rendering: pixelated;">`;
+                    }
+                } else {
+                    alert('Error exporting character: ' + result.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error exporting character: ' + error.message);
+            });
+        }
+    </script>
+</body>
+</html>
