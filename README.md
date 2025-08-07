@@ -1,6 +1,8 @@
-# SGDK Character Creator
+# SGDK Character Creator v1.1.0
 
 直感的なキャラクター作成ツールで、SGDK（SEGA Genesis Development Kit）用のスプライトを簡単に生成できます。
+
+![SGDK Character Creator](https://raw.githubusercontent.com/KG-NINJA/SGDKDOT/main/assets/screenshot.png)
 
 ## 特徴
 
@@ -18,12 +20,17 @@
 - **SGDK形式出力** - 完全なSGDK互換ファイルを生成
 - **キャラクター保存/読み込み** - JSON形式でキャラクターデータを管理
 - **ランダム生成** - ワンクリックでランダムキャラクターを作成
+- **ファイルダウンロード** - 生成されたファイルを直接ダウンロード
 
 ## 使用方法
 
 ### Webアプリケーションの起動
 
 ```bash
+# 依存関係のインストール
+pip install flask pillow flask-cors
+
+# アプリケーションの起動
 cd SGDKDOT
 python web_app.py
 ```
@@ -40,12 +47,23 @@ python web_app.py
 
 ### SGDK形式でのエクスポート
 
-1. キャラクター名を入力
+1. キャラクター名を入力（英数字とアンダースコアのみ使用可能）
 2. "Export to SGDK" ボタンをクリック
 3. 以下のファイルが生成されます：
    - `character_name.c` - Cソースファイル
    - `character_name.h` - ヘッダーファイル
    - `character_name.png` - スプライトシート（参照用）
+4. 各ファイルの「Download」リンクをクリックしてダウンロード可能
+
+### キャラクターの保存と読み込み
+
+- **Save Character** ボタンをクリックすると、現在のキャラクター設定をJSON形式で保存できます
+- **Load Character** ボタンをクリックすると、保存したJSONファイルからキャラクター設定を読み込めます
+
+### ランダムキャラクター生成
+
+- **Random Character** ボタンをクリックすると、ランダムな設定のキャラクターが生成されます
+- 肌の色は70%の確率で頭と腕で一致するようになっています
 
 ### 生成されるファイルの使用方法
 
@@ -79,8 +97,10 @@ SGDKDOT/
 │   └── index.html           # Webインターフェース
 ├── static/
 │   └── output/              # 生成ファイル出力先
+├── assets/                  # 画像などのアセット
 ├── web_app.py               # Webアプリケーション
-└── main.py                  # エントリーポイント
+├── main.py                  # エントリーポイント
+└── example_usage.py         # プログラムからの使用例
 ```
 
 ## 技術仕様
@@ -94,8 +114,54 @@ SGDKDOT/
 ## 依存関係
 
 ```bash
-pip install flask pillow
+pip install flask pillow flask-cors
 ```
+
+## プログラムからの使用
+
+`example_usage.py` を参照してください。基本的な使用方法：
+
+```python
+from app.core.generator import CharacterGenerator
+from app.core.exporter import SGDKExporter
+
+# キャラクター生成
+generator = CharacterGenerator()
+exporter = SGDKExporter()
+
+# キャラクター設定
+character_data = {
+    "head_type": "round",
+    "body_type": "normal",
+    "arm_type": "normal",
+    "leg_type": "normal",
+    "head_color": "#FFDDAA",
+    "body_color": "#0066CC",
+    "arm_color": "#FFDDAA",
+    "leg_color": "#0066CC",
+    "size": 32,
+    "animation_frames": 4
+}
+
+# プレビュー生成
+sprite = generator.generate_character(character_data, frame=0)
+sprite.save("preview.png")
+
+# SGDK形式でエクスポート
+exporter.export_character(character_data, "output/character.c")
+```
+
+## 更新履歴
+
+### v1.1.0
+- ファイルダウンロード機能の追加
+- エラー処理の改善
+- ランダム生成アルゴリズムの改善
+- UIの改善（ヘッダー、フッター、スタイル）
+- CORS対応
+
+### v1.0.0
+- 初回リリース
 
 ## ライセンス
 
