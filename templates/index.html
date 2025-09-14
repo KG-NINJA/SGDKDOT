@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SGDK Character Creator</title>
+    <title>SGDK Character Creator - メガドライブ風キャラクター作成ツール</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎮</text></svg>">
     <style>
         body {
             font-family: 'Courier New', monospace;
@@ -205,9 +206,31 @@
             border-radius: 3px;
             margin: 10px 0;
         }
+        
+        .download-link {
+            display: inline-block;
+            background-color: #00AEEF;
+            color: #000000;
+            padding: 2px 8px;
+            border-radius: 3px;
+            text-decoration: none;
+            font-size: 12px;
+            margin-left: 10px;
+            transition: background-color 0.2s;
+        }
+        
+        .download-link:hover {
+            background-color: #E60012;
+            color: #FFFFFF;
+        }
     </style>
 </head>
 <body>
+    <header style="text-align: center; margin-bottom: 20px;">
+        <h1 style="color: #E60012; text-shadow: 2px 2px 4px #000000;">SGDK Character Creator</h1>
+        <p style="color: #00AEEF;">メガドライブ風キャラクター作成ツール v1.1.0</p>
+    </header>
+    
     <div class="container">
         <!-- Control Panel -->
         <div class="panel">
@@ -338,6 +361,11 @@
         </div>
     </div>
     
+    <footer style="text-align: center; margin-top: 30px; padding: 20px; color: #00AEEF; font-size: 14px;">
+        <p>SGDK Character Creator v1.1.0 | <a href="https://github.com/KG-NINJA/SGDKDOT" style="color: #E60012;">GitHub</a></p>
+        <p>Created for SEGA Genesis/Mega Drive developers using <a href="https://github.com/Stephane-D/SGDK" style="color: #E60012;">SGDK</a></p>
+    </footer>
+    
     <script>
         let currentFrame = 0;
         let animationInterval = null;
@@ -429,10 +457,22 @@
                     updateFrameInfo();
                 } else {
                     console.error('Error generating character:', result.error);
+                    const loading = document.getElementById('loading');
+                    loading.style.display = 'block';
+                    loading.innerHTML = `<div class="error">
+                        <h4>Error Generating Character</h4>
+                        <p>${result.error}</p>
+                    </div>`;
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
+                const loading = document.getElementById('loading');
+                loading.style.display = 'block';
+                loading.innerHTML = `<div class="error">
+                    <h4>Network Error</h4>
+                    <p>Failed to connect to the server: ${error.message}</p>
+                </div>`;
             });
         }
         
@@ -560,27 +600,46 @@
                     const output = document.getElementById('export_output');
                     output.style.display = 'block';
                     
+                    const actualName = result.character_name || characterName;
+                    
                     if (result.files.c_file) {
                         document.getElementById('c_file_output').innerHTML = 
-                            `<h5>${characterName}.c</h5><div class="file-output">${result.files.c_file}</div>`;
+                            `<h5>${actualName}.c <a href="${result.download_links.c_file}" download="${actualName}.c" class="download-link">Download</a></h5>
+                             <div class="file-output">${result.files.c_file}</div>`;
                     }
                     
                     if (result.files.h_file) {
                         document.getElementById('h_file_output').innerHTML = 
-                            `<h5>${characterName}.h</h5><div class="file-output">${result.files.h_file}</div>`;
+                            `<h5>${actualName}.h <a href="${result.download_links.h_file}" download="${actualName}.h" class="download-link">Download</a></h5>
+                             <div class="file-output">${result.files.h_file}</div>`;
                     }
                     
                     if (result.files.png_file) {
                         document.getElementById('png_output').innerHTML = 
-                            `<h5>${characterName}.png (Sprite Sheet)</h5><img src="${result.files.png_file}" style="max-width: 100%; image-rendering: pixelated;">`;
+                            `<h5>${actualName}.png (Sprite Sheet) <a href="${result.download_links.png_file}" download="${actualName}.png" class="download-link">Download</a></h5>
+                             <img src="${result.files.png_file}" style="max-width: 100%; image-rendering: pixelated;">`;
                     }
                 } else {
-                    alert('Error exporting character: ' + result.error);
+                    const output = document.getElementById('export_output');
+                    output.style.display = 'block';
+                    output.innerHTML = `<div class="error">
+                        <h4>Error Exporting Character</h4>
+                        <p>${result.error}</p>
+                        <details>
+                            <summary>Technical Details</summary>
+                            <pre>${result.details || 'No details available'}</pre>
+                        </details>
+                    </div>`;
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('Error exporting character: ' + error.message);
+                const output = document.getElementById('export_output');
+                output.style.display = 'block';
+                output.innerHTML = `<div class="error">
+                    <h4>Network Error</h4>
+                    <p>Failed to connect to the server: ${error.message}</p>
+                </div>`;
             });
         }
     </script>
